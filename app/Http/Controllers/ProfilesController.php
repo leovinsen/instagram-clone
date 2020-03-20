@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
+use Intervention\Image\Facades\Image;
 
 class ProfilesController extends Controller
 {
@@ -28,6 +29,18 @@ class ProfilesController extends Controller
             'url' => 'url',
             'image' => '',
         ]);
+
+
+        if(request('image')){
+            $imagePath = request('image')->store('profile', 'public');
+
+            $image = Image::make(public_path("storage/{$imagePath}"))->fit(1000, 1000);
+            $image->save();
+
+            //Update the imagePath only if image was submitted
+            //If user did not submit the image, use old image
+            $data = array_merge($data, ['image' => $imagePath]);
+        }
 
         auth()->user()->profile->update($data);
 
